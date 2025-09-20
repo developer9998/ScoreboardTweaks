@@ -13,7 +13,7 @@ namespace ScoreboardTweaks.Patches
             if (!__instance.enabled || m_flNextPress > Time.realtimeSinceStartup || __instance.touchTime + __instance.debounceTime >= Time.realtimeSinceStartup) return false;
            
             if (collider.GetComponent<GorillaTriggerColliderHandIndicator>())
-                m_flNextPress = Time.realtimeSinceStartup + 0.125f;
+                m_flNextPress = Time.realtimeSinceStartup + Constants.Scoreboard_GlobalButtonDebounce;
 
             return true;
         }

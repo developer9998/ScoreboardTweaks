@@ -13,7 +13,14 @@ namespace ScoreboardTweaks.Patches
 
             if (muteButton?.isOn ?? false)
             {
-                speakerIcon?.sprite = Main.m_spriteGizmoMuted;
+                speakerIcon?.sprite = Main.m_spriteGizmoManualMuted;
+                speakerIcon?.enabled = true;
+                return;
+            }
+
+            if (muteButton?.isAutoOn ?? false)
+            {
+                speakerIcon?.sprite = Main.m_spriteGizmoAutoMuted;
                 speakerIcon?.enabled = true;
                 return;
             }
