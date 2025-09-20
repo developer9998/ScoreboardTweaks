@@ -1,73 +1,69 @@
 ﻿using BepInEx;
 using BepInEx.Bootstrap;
+using BepInEx.Logging;
 using HarmonyLib;
-using Photon.Pun;
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace ScoreboardTweaks
 {
-    [BepInPlugin(ModConstants.ModConstants.modGUID, ModConstants.ModConstants.modName, ModConstants.ModConstants.modVersion)]
-    public class Main : BaseUnityPlugin
+    [BepInDependency("net.rusjj.gorillafriends", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInPlugin(Constants.modGUID, Constants.modName, Constants.modVersion)]
+    internal class Main : BaseUnityPlugin
     {
-        internal static Main m_hInstance = null;
-        internal static List<Text> m_listScoreboardTexts = new List<Text>();
-        internal static Sprite m_spriteGizmoMuted = null;
-        internal static Sprite m_spriteGizmoOriginal = null;
-        internal static Material m_materialReportButtons = null;
-        internal static void Log(string msg) => m_hInstance.Logger.LogMessage(msg);
-        void Awake()
+        public static new ManualLogSource Logger;
+
+        public static HashSet<GorillaScoreBoard> m_listScoreboards = [];
+
+        public static Sprite m_spriteGizmoMuted = null, m_spriteGizmoOriginal = null;
+
+        public static string[] dependencyGUIDList;
+
+        public void Awake()
         {
-            m_hInstance = this;
-            HarmonyPatcher.Patch.Apply();
-        }
-        void Start()
-        {
+            Logger = base.Logger;
+
+            Harmony.CreateAndPatchAll(GetType().Assembly, Constants.modGUID);
+
+            IEnumerable<BepInDependency> attributes = GetType().GetCustomAttributes<BepInDependency>(false);
+            dependencyGUIDList = [.. attributes.Select(attribute => attribute.DependencyGUID)];
+
             foreach (var plugin in Chainloader.PluginInfos.Values)
             {
-                try { AccessTools.Method(plugin.Instance.GetType(), "OnScoreboardTweakerStart")?.Invoke(plugin.Instance, new object[] { }); } catch (Exception e) { }
+                if (!dependencyGUIDList.Contains(plugin.Metadata.GUID)) continue;
+
+                try
+                {
+                    foreach (MethodInfo method in AccessTools.GetDeclaredMethods(plugin.Instance.GetType()))
+                    {
+                        if (method.Name == "OnScoreboardTweakerStart")
+                        {
+                            Logger.LogMessage($"Called OnScoreboardTweakerStart for {plugin.Metadata.Name}/{plugin.Metadata.GUID}");
+                            method.Invoke(plugin.Instance, []);
+                            break;
+                        }
+                    }
+                }
+                catch
+                {
+
+                }
             }
 
-            Texture2D tex = new Texture2D(2, 2);
-            var file = new FileInfo(AssemblyDirectory + "/gizmo-speaker-muted.png");
-            if (!file.Exists) { Log("MutedGizmo file doesn`t exists!"); return; }
-            tex.LoadImage(File.ReadAllBytes(file.FullName));
+            FileInfo file = new(Path.Combine(Path.GetDirectoryName(typeof(Main).Assembly.Location), "gizmo-speaker-muted.png"));
+            if (!file.Exists)
+            {
+                return;
+            }
 
-            m_spriteGizmoMuted = Sprite.Create(tex, new Rect(0.0f, 0.0f, 512.0f, 512.0f), new Vector2(0.5f, 0.5f), 100.0f);
+            Texture2D texture = new(2, 2);
+            texture.LoadImage(File.ReadAllBytes(file.FullName));
+
+            m_spriteGizmoMuted = Sprite.Create(texture, new Rect(0.0f, 0.0f, 512.0f, 512.0f), new Vector2(0.5f, 0.5f), 100.0f);
             m_spriteGizmoMuted.name = "gizmo-speaker-muted";
-        }
-        public static void UpdateScoreboardTopText(string roomCode = null)
-        {
-            if (PhotonNetwork.InRoom) foreach (var txt in m_listScoreboardTexts)
-            {
-                txt.text = "ROOM ID: " + (!PhotonNetwork.CurrentRoom.IsVisible ? "-PRIVATE-" : (roomCode == null ? PhotonNetwork.CurrentRoom.Name : roomCode)) + "\n  PLAYER STATUS            REPORT";
-            }
-        }
-
-        /* https://stackoverflow.com/questions/52797/how-do-i-get-the-path-of-the-assembly-the-code-is-in */
-        public static string AssemblyDirectory
-        {
-            get
-            {
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
-                string path = Uri.UnescapeDataString(uri.Path);
-                return Path.GetDirectoryName(path);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(PhotonNetwork))]
-    [HarmonyPatch("Disconnect", MethodType.Normal)]
-    internal class OnRoomDisconnected
-    {
-        private static void Prefix()
-        {
-            Main.m_listScoreboardTexts.Clear();
         }
     }
 }
