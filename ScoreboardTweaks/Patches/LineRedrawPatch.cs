@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 namespace ScoreboardTweaks.Patches
 {
@@ -10,12 +11,11 @@ namespace ScoreboardTweaks.Patches
     {
         public static bool Prefix(GorillaScoreBoard __instance)
         {
-            // string beginningString = __instance.GetBeginningString();
-            // if (beginningString.Split('\n') is string[] beginningLines && beginningLines.Length > 0) beginningString = beginningLines[0];
+            string beginningString = __instance.GetBeginningString();
+            if (beginningString.Contains('\n')) beginningString = beginningString.Split('\n', StringSplitOptions.RemoveEmptyEntries)[0];
 
             __instance.stringBuilder.Clear();
-            __instance.stringBuilder.AppendLine($"ROOM ID: {(NetworkSystem.Instance.SessionIsPrivate ? "-PRIVATE-" : NetworkSystem.Instance.RoomName)}");
-            // __instance.stringBuilder.AppendLine(beginningString);
+            __instance.stringBuilder.AppendLine(beginningString);
             __instance.stringBuilder.Append("  PLAYER STATUS           REPORT");
             __instance.buttonStringBuilder.Clear();
 

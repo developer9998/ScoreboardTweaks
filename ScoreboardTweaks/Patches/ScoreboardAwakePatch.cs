@@ -97,6 +97,7 @@ namespace ScoreboardTweaks.Patches
 
                         t.localPosition = new Vector3(-115.0f, 0.0f, 0.0f);
                         t.localScale = new Vector3(1.8f, 1.8f, 1.8f);
+                        t.GetComponent<SpriteRenderer>().sortingOrder++;
 
                         continue;
                     }
