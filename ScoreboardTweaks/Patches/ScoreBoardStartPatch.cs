@@ -173,7 +173,7 @@ namespace ScoreboardTweaks.Patches
                             textMeshPro.fontSizeMax = 100f;
                             textMeshPro.enableAutoSizing = true;
                             textMeshPro.alignment = TextAlignmentOptions.Center;
-                            textMeshPro.margin = new Vector4(57f, 5.5f, 57f, 5.5f);
+                            textMeshPro.margin = new Vector4(57f, 4f, 57f, 4f);
                             textMeshPro.characterSpacing = -10f;
                             textMeshPro.lineSpacing = 10f;
                             textMeshPro.color = lineButton.myText.color;
