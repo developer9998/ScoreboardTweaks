@@ -10,11 +10,7 @@ namespace ScoreboardTweaks.Patches
         [HarmonyPostfix]
         public static void LineButtonPressPatch(GorillaPlayerScoreboardLine __instance, GorillaPlayerLineButton.ButtonType buttonType)
         {
-            if (buttonType == GorillaPlayerLineButton.ButtonType.Mute)
-            {
-                // Update speaker icon for player
-                __instance.UpdateLine();
-            }
+            if (buttonType == GorillaPlayerLineButton.ButtonType.Mute) __instance.UpdateLine();
         }
 
         [HarmonyPatch(nameof(GorillaPlayerScoreboardLine.UpdateLine))]
@@ -24,18 +20,21 @@ namespace ScoreboardTweaks.Patches
             SpriteRenderer speakerIcon = __instance.speakerIcon;
             GorillaPlayerLineButton muteButton = __instance.muteButton;
 
-            if (muteButton?.isOn ?? false)
+            if (muteButton?.gameObject?.activeSelf ?? false)
             {
-                speakerIcon?.sprite = Main.m_spriteGizmoManualMuted;
-                speakerIcon?.enabled = true;
-                return;
-            }
+                if (muteButton?.isOn ?? false)
+                {
+                    speakerIcon?.sprite = Main.m_spriteGizmoManualMuted;
+                    speakerIcon?.enabled = true;
+                    return;
+                }
 
-            if (muteButton?.isAutoOn ?? false)
-            {
-                speakerIcon?.sprite = Main.m_spriteGizmoAutoMuted;
-                speakerIcon?.enabled = true;
-                return;
+                if (muteButton?.isAutoOn ?? false)
+                {
+                    speakerIcon?.sprite = Main.m_spriteGizmoAutoMuted;
+                    speakerIcon?.enabled = true;
+                    return;
+                }
             }
 
             speakerIcon?.sprite = Main.m_spriteGizmoOriginal;
