@@ -11,7 +11,7 @@ namespace ScoreboardTweaks.Patches
         private static bool Prefix(GorillaPlayerLineButton __instance, Collider collider)
         {
             if (!__instance.enabled || m_flNextPress > Time.realtimeSinceStartup || __instance.touchTime + __instance.debounceTime >= Time.realtimeSinceStartup) return false;
-           
+
             if (collider.GetComponent<GorillaTriggerColliderHandIndicator>())
                 m_flNextPress = Time.realtimeSinceStartup + Constants.Scoreboard_GlobalButtonDebounce;
 

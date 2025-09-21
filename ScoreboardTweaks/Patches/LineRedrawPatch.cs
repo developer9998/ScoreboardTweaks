@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
-using UnityEngine;
-using UnityEngine.UI;
 using System;
+using TMPro;
+using UnityEngine;
 
 namespace ScoreboardTweaks.Patches
 {
@@ -16,21 +16,26 @@ namespace ScoreboardTweaks.Patches
 
             __instance.stringBuilder.Clear();
             __instance.stringBuilder.AppendLine(beginningString);
-            __instance.stringBuilder.Append("  PLAYER STATUS           REPORT");
+            __instance.stringBuilder.Append((GorillaScoreboardTotalUpdater.instance?.playersInRoom?.Count ?? 0) > 1 ? "  PLAYER STATUS              REPORT" : "  PLAYER STATUS");
             __instance.buttonStringBuilder.Clear();
 
-            bool nametagsAllowed = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
+            bool isFeatureEnabled = KIDManager.CheckFeatureSettingEnabled(EKIDFeatures.Custom_Nametags);
+
             for (int i = 0; i < __instance.lines.Count; i++)
             {
                 try
                 {
-                    if (__instance.lines[i].gameObject.activeInHierarchy)
-                    {
-                        __instance.lines[i].GetComponent<RectTransform>().localPosition = new Vector3(0f, (float)(__instance.startingYValue - __instance.lineHeight * i), 0f);
+                    GorillaPlayerScoreboardLine line = __instance.lines[i];
 
-                        Text playerName = __instance.lines[i].playerName;
-                        playerName?.text = nametagsAllowed ? __instance.lines[i].playerNameVisible : __instance.lines[i].linePlayer.DefaultName;
-                        playerName?.color = __instance.lines[i].playerVRRig?.playerText1?.color ?? Color.white;
+                    if (line.gameObject.activeInHierarchy)
+                    {
+                        line.GetComponent<RectTransform>().localPosition = new Vector3(0f, __instance.startingYValue - __instance.lineHeight * i, 0f);
+
+                        if (Main.m_lineTextOverride[line].TryGetValue("PlayerText", out TMP_Text playerText))
+                        {
+                            playerText.text = isFeatureEnabled ? line.playerNameVisible : line.linePlayer.DefaultName;
+                            playerText.color = line.playerVRRig?.playerText1?.color ?? Color.white;
+                        }
                     }
                 }
                 catch

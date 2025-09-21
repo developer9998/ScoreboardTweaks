@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -19,6 +20,8 @@ namespace ScoreboardTweaks
         public static new ManualLogSource Logger;
 
         public static HashSet<GorillaScoreBoard> m_listScoreboards = [];
+
+        public static Dictionary<GorillaPlayerScoreboardLine, Dictionary<object, TMP_Text>> m_lineTextOverride = [];
 
         public static Sprite m_spriteGizmoManualMuted = null, m_spriteGizmoAutoMuted = null, m_spriteGizmoOriginal = null;
 
