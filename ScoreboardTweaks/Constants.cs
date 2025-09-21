@@ -6,7 +6,7 @@
 
         public const string Name = "Scoreboard Tweaks";
 
-        public const string Version = "1.2.1";
+        public const string Version = "1.2.2";
 
         public const string RepositoryContentUrl = "https://raw.githubusercontent.com/developer9998/ScoreboardTweaks/main/Content";
 

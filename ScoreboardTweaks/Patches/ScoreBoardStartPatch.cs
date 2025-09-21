@@ -115,7 +115,7 @@ namespace ScoreboardTweaks.Patches
                     {
                         Main.m_spriteGizmoOriginal ??= child.GetComponent<SpriteRenderer>().sprite;
 
-                        child.localPosition = new Vector3(-115.0f, 0.0f, 0.0f);
+                        child.localPosition = new Vector3(-115.0f, 0.0f, 0.15f);
                         child.localScale = new Vector3(1.8f, 1.8f, 1.8f);
                         child.GetComponent<SpriteRenderer>().sortingOrder++;
 
