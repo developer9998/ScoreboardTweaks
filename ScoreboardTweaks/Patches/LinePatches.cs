@@ -3,10 +3,23 @@ using UnityEngine;
 
 namespace ScoreboardTweaks.Patches
 {
-    [HarmonyPatch(typeof(GorillaPlayerScoreboardLine), nameof(GorillaPlayerScoreboardLine.UpdateLine))]
-    internal class LineUpdatePatch
+    [HarmonyPatch(typeof(GorillaPlayerScoreboardLine))]
+    internal class LinePatches
     {
-        public static void Postfix(GorillaPlayerScoreboardLine __instance)
+        [HarmonyPatch(nameof(GorillaPlayerScoreboardLine.PressButton))]
+        [HarmonyPostfix]
+        public static void LineButtonPressPatch(GorillaPlayerScoreboardLine __instance, GorillaPlayerLineButton.ButtonType buttonType)
+        {
+            if (buttonType == GorillaPlayerLineButton.ButtonType.Mute)
+            {
+                // Update speaker icon for player
+                __instance.UpdateLine();
+            }
+        }
+
+        [HarmonyPatch(nameof(GorillaPlayerScoreboardLine.UpdateLine))]
+        [HarmonyPrefix]
+        public static void LineUpdatePatch(GorillaPlayerScoreboardLine __instance)
         {
             SpriteRenderer speakerIcon = __instance.speakerIcon;
             GorillaPlayerLineButton muteButton = __instance.muteButton;
