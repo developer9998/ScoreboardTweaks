@@ -106,7 +106,7 @@ namespace ScoreboardTweaks.Patches
 
                     if (child.name == "Color Swatch")
                     {
-                        child.localPosition = new Vector3(-115.0f, 0.0f, 0.3f);
+                        child.localPosition = new Vector3(-115.0f, 0.0f, 0.0f);
 
                         continue;
                     }
@@ -125,6 +125,19 @@ namespace ScoreboardTweaks.Patches
                     if (child.TryGetComponent(out GorillaPlayerLineButton lineButton))
                     {
                         ButtonType buttonType = lineButton.buttonType;
+
+                        GorillaPlayerLineButton mainButtonInstance = buttonType switch
+                        {
+                            ButtonType.Mute => lineButton.parentLine.muteButton,
+                            ButtonType.Report => lineButton.parentLine.reportButton,
+                            ButtonType.HateSpeech => lineButton.parentLine.hateSpeechButton.GetComponent<GorillaPlayerLineButton>(),
+                            ButtonType.Toxicity => lineButton.parentLine.toxicityButton.GetComponent<GorillaPlayerLineButton>(),
+                            ButtonType.Cheating => lineButton.parentLine.cheatingButton.GetComponent<GorillaPlayerLineButton>(),
+                            ButtonType.Cancel => lineButton.parentLine.cancelButton.GetComponent<GorillaPlayerLineButton>(),
+                            _ => null
+                        };
+
+                        if (mainButtonInstance != null && mainButtonInstance && mainButtonInstance != lineButton) continue;
 
                         if (buttonType == ButtonType.Mute)
                         {
@@ -197,6 +210,8 @@ namespace ScoreboardTweaks.Patches
                                 child.GetComponent<MeshRenderer>().material = lineButton.offMaterial;
                             }
                         }
+
+                        continue;
                     }
                 }
             }
