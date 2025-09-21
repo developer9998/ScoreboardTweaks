@@ -18,7 +18,7 @@ namespace ScoreboardTweaks.Patches
         }
 
         [HarmonyPatch(nameof(GorillaPlayerScoreboardLine.UpdateLine))]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         public static void LineUpdatePatch(GorillaPlayerScoreboardLine __instance)
         {
             SpriteRenderer speakerIcon = __instance.speakerIcon;
