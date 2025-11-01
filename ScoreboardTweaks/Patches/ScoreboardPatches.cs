@@ -138,6 +138,7 @@ namespace ScoreboardTweaks.Patches
 
                         overrideTextDictionary.TryAdd("PlayerText", textMeshPro);
 
+                        /*
                         if (__instance.TryGetComponent(out StaticLodGroup lodGroup))
                         {
                             int index = lodGroup.index;
@@ -147,6 +148,7 @@ namespace ScoreboardTweaks.Patches
                                 StaticLodManager.groupInfos[index] = groupInfo;
                             }
                         }
+                        */
 
                         continue;
                     }
@@ -238,6 +240,7 @@ namespace ScoreboardTweaks.Patches
 
                             overrideTextDictionary.TryAdd(buttonType, textMeshPro);
 
+                            /*
                             if (__instance.TryGetComponent(out StaticLodGroup lodGroup))
                             {
                                 int index = lodGroup.index;
@@ -247,6 +250,7 @@ namespace ScoreboardTweaks.Patches
                                     StaticLodManager.groupInfos[index] = groupInfo;
                                 }
                             }
+                            */
 
                             if (buttonType != ButtonType.Report)
                             {
