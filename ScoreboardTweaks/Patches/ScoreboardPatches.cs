@@ -1,6 +1,5 @@
 ﻿using BepInEx.Bootstrap;
 using GorillaExtensions;
-using GorillaTag;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -23,11 +22,6 @@ namespace ScoreboardTweaks.Patches
         {
             string beginningString = __instance.GetBeginningString();
             if (beginningString.Contains('\n')) beginningString = beginningString.Split('\n', StringSplitOptions.RemoveEmptyEntries)[0];
-
-            __instance.stringBuilder.Clear();
-            __instance.stringBuilder.AppendLine(beginningString);
-            __instance.stringBuilder.Append((GorillaScoreboardTotalUpdater.instance?.playersInRoom?.Count ?? 0) > 1 ? "  PLAYER STATUS              REPORT" : "  PLAYER STATUS");
-            __instance.buttonStringBuilder.Clear();
 
             bool isFeatureEnabled = KIDManager.CheckFeatureSettingEnabled(EKIDFeatures.Custom_Nametags);
 
@@ -54,13 +48,26 @@ namespace ScoreboardTweaks.Patches
                 }
             }
 
-            __instance.boardText.text = __instance.stringBuilder.ToString();
-            __instance.buttonText.text = __instance.buttonStringBuilder.ToString();
+            __instance.boardText.text = beginningString;
+            __instance.boardText.ForceMeshUpdate(true);
+
+            __instance.buttonText.text = string.Empty;
             __instance._isDirty = false;
+
+            if (Main.m_lineTextOverride.TryGetValue(__instance, out Dictionary<object, TMP_Text> boardTextDictionary))
+            {
+                if (boardTextDictionary.TryGetValue("PlayerStatus", out TMP_Text playerStatusHeaderText))
+                    playerStatusHeaderText.fontSize = __instance.boardText.fontSize;
+
+                if (boardTextDictionary.TryGetValue("Report", out TMP_Text reportHeaderText))
+                {
+                    reportHeaderText.enabled = NetworkSystem.Instance.RoomPlayerCount > 1;
+                    reportHeaderText.fontSize = __instance.boardText.fontSize;
+                }
+            }
 
             return false;
         }
-
 
         [HarmonyPatch(nameof(GorillaScoreBoard.Start))]
         [HarmonyPrefix]
@@ -95,6 +102,36 @@ namespace ScoreboardTweaks.Patches
             __instance.boardText.margin = new Vector4(5.55f, 3f);
             __instance.boardText.lineSpacing = 60f;
             __instance.boardText.fontSize = 70f;
+            __instance.boardText.fontSizeMax = 70f;
+
+            Dictionary<object, TMP_Text> boardTextDictionary = [];
+            Main.m_lineTextOverride.TryAdd(__instance, boardTextDictionary);
+
+            GameObject playerStatusHeaderObject = UnityEngine.Object.Instantiate(__instance.boardText.gameObject);
+            TMP_Text playerStatusHeaderText = playerStatusHeaderObject.GetComponent<TMP_Text>();
+            playerStatusHeaderText.alignment = TextAlignmentOptions.BottomLeft;
+            playerStatusHeaderText.text = "PLAYER STATUS";
+            playerStatusHeaderText.margin = new Vector4(15f, 0f, 0f, 173f);
+            boardTextDictionary.Add("PlayerStatus", playerStatusHeaderText);
+
+            GameObject reportHeaderObject = UnityEngine.Object.Instantiate(__instance.boardText.gameObject);
+            TMP_Text reportHeaderText = reportHeaderObject.GetComponent<TMP_Text>();
+            reportHeaderText.alignment = TextAlignmentOptions.BottomLeft;
+            reportHeaderText.text = "REPORT";
+            reportHeaderText.margin = new Vector4(145f, 0f, 0f, 173f);
+            boardTextDictionary.Add("Report", reportHeaderText);
+
+            playerStatusHeaderObject.transform.parent = __instance.boardText.transform;
+            playerStatusHeaderObject.transform.localPosition = Vector3.zero;
+            playerStatusHeaderObject.transform.localEulerAngles = Vector3.zero;
+            playerStatusHeaderObject.transform.localScale = Vector3.one;
+
+            reportHeaderObject.transform.parent = __instance.boardText.transform;
+            reportHeaderObject.transform.localPosition = Vector3.zero;
+            reportHeaderObject.transform.localEulerAngles = Vector3.zero;
+            reportHeaderObject.transform.localScale = Vector3.one;
+
+            __instance.boardText.enableAutoSizing = true;
 
             if (Main.m_spriteGizmoOriginal == null && __instance.scoreBoardLinePrefab is GameObject prefab && prefab)
             {
@@ -266,6 +303,19 @@ namespace ScoreboardTweaks.Patches
                     }
                 }
             }
+        }
+
+        [HarmonyPatch(nameof(GorillaScoreBoard.SetSleepState))]
+        [HarmonyPostfix]
+        public static void ScoreboardSleepStatePatch(GorillaScoreBoard __instance, bool awake)
+        {
+            if (!Main.m_lineTextOverride.TryGetValue(__instance, out Dictionary<object, TMP_Text> boardTextDictionary)) return;
+
+            if (boardTextDictionary.TryGetValue("PlayerStatus", out TMP_Text playerStatusHeaderText))
+                playerStatusHeaderText.enabled = awake;
+
+            if (boardTextDictionary.TryGetValue("Report", out TMP_Text reportHeaderText))
+                reportHeaderText.enabled = awake;
         }
     }
 }

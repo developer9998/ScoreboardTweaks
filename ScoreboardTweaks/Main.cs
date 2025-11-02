@@ -21,7 +21,7 @@ namespace ScoreboardTweaks
 
         public static HashSet<GorillaScoreBoard> m_listScoreboards = [];
 
-        public static Dictionary<GorillaPlayerScoreboardLine, Dictionary<object, TMP_Text>> m_lineTextOverride = [];
+        public static Dictionary<object, Dictionary<object, TMP_Text>> m_lineTextOverride = [];
 
         public static Sprite m_spriteGizmoManualMuted = null, m_spriteGizmoAutoMuted = null, m_spriteGizmoOriginal = null;
 
