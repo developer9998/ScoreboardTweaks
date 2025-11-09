@@ -61,7 +61,7 @@ namespace ScoreboardTweaks.Patches
 
                 if (boardTextDictionary.TryGetValue("Report", out TMP_Text reportHeaderText))
                 {
-                    reportHeaderText.enabled = NetworkSystem.Instance.RoomPlayerCount > 1;
+                    reportHeaderText.enabled = NetworkSystem.Instance.InRoom && NetworkSystem.Instance.RoomPlayerCount > 1;
                     reportHeaderText.fontSize = __instance.boardText.fontSize;
                 }
             }
